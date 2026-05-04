@@ -1,6 +1,6 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -25,16 +25,17 @@ async function startServer() {
         });
       }
 
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview", 
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        config: {
-          systemInstruction: systemInstruction 
-        }
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        systemInstruction: systemInstruction
       });
+      
+      const result = await model.generateContent(prompt);
+      const resAI = await result.response;
+      const text = resAI.text();
 
-      res.json({ text: response.text });
+      res.json({ text });
     } catch (error: any) {
       console.error("AI Generation Error:", error);
       res.status(500).json({ error: error.message || "Failed to generate content" });

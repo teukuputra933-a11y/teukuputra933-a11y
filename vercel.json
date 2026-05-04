@@ -1,9 +1,18 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/api/generate",
+      "destination": "/api/generate.ts"
+    },
+    {
       "source": "/api/(.*)",
-      "destination": "/api/index.ts"
+      "destination": "/api/generate.ts"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -17,18 +17,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
-    
-    // Gunakan model gemini-1.5-flash untuk stabilitas
-    const response = await ai.models.generateContent({
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      config: {
-        systemInstruction: systemInstruction
-      }
+      systemInstruction: systemInstruction
     });
+    
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
 
-    return res.status(200).json({ text: response.text });
+    return res.status(200).json({ text });
   } catch (error: any) {
     console.error("AI Generation Error:", error);
     return res.status(500).json({ error: error.message || "Gagal menghasilkan konten" });
