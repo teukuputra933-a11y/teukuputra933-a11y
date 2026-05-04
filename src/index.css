@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@layer base {
+  /* Simple fallback styles for AI-generated RPP content if prose is not available */
+  .document-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+  }
+  .document-content th, .document-content td {
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+  }
+  .document-content h1, .document-content h2, .document-content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #0D2A4A;
+  }
+  .document-content p {
+    margin-bottom: 0.75rem;
+  }
+}
