@@ -1,42 +1,35 @@
-import express from "express";
 import { GoogleGenAI } from "@google/genai";
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const app = express();
-app.use(express.json());
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Hanya izinkan metode POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
-// API Route for RPP Generation
-const handleGenerate = async (req: express.Request, res: express.Response) => {
   try {
     const { prompt, systemInstruction } = req.body;
     
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
     if (!apiKey) {
       return res.status(500).json({ 
-        error: "GEMINI_API_KEY belum dikonfigurasi di server. Silakan buka menu 'Settings' di Vercel Dashboard dan tambahkan GEMINI_API_KEY Anda." 
+        error: "GEMINI_API_KEY belum dikonfigurasi di Vercel. Silakan buka Dashboard Vercel -> Settings -> Environment Variables dan tambahkan GEMINI_API_KEY Anda." 
       });
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const result = await ai.models.generateContent({
+    
+    const response = await ai.models.generateContent({
       model: "gemini-1.5-flash",
-      contents: prompt,
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
       config: {
         systemInstruction: systemInstruction
       }
     });
 
-    res.json({ text: result.text });
+    return res.status(200).json({ text: response.text });
   } catch (error: any) {
     console.error("AI Generation Error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate content" });
+    return res.status(500).json({ error: error.message || "Gagal menghasilkan konten" });
   }
-};
-
-app.post("/api/generate", handleGenerate);
-app.post("/generate", handleGenerate);
-
-// Health check
-app.get("/api/health", (req, res) => res.json({ status: "ok" }));
-app.get("/health", (req, res) => res.json({ status: "ok" }));
-
-export default app;
+}

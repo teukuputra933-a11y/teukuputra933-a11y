@@ -18,7 +18,7 @@ async function startServer() {
     try {
       const { prompt, systemInstruction } = req.body;
       
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY?.trim();
       if (!apiKey) {
         return res.status(500).json({ 
           error: "GEMINI_API_KEY belum dikonfigurasi di server. Silakan buka menu 'Settings' -> 'Secrets' di AI Studio dan tambahkan GEMINI_API_KEY Anda agar aplikasi bisa digunakan oleh orang lain." 
@@ -26,15 +26,15 @@ async function startServer() {
       }
 
       const ai = new GoogleGenAI({ apiKey });
-      const result = await ai.models.generateContent({
+      const response = await ai.models.generateContent({
         model: "gemini-1.5-flash",
-        contents: prompt,
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
         config: {
           systemInstruction: systemInstruction
         }
       });
 
-      res.json({ text: result.text });
+      res.json({ text: response.text });
     } catch (error: any) {
       console.error("AI Generation Error:", error);
       res.status(500).json({ error: error.message || "Failed to generate content" });
